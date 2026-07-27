@@ -1,1 +1,138 @@
+--[[ 
+    AUTO-BUILDER SYSTEM (GitHub/JSON)
+    Формат файла: Название-X Y Z-S X S Y S Z=end
+    Пример: Block-20 1 1-7 8 9=end
+]]
+
+local Player = game.Players.LocalPlayer
+local HttpService = game:GetService("HttpService")
+local Workspace = game:GetService("Workspace")
+
+-- === НАСТРОЙКИ ===
+-- Вставь сюда прямую ссылку на RAW файл с GitHub (ссылка должна начинаться с raw.githubusercontent.com)
+local GitHubUrl = "https://raw.githubusercontent.com/maksimdubovichklassr200020-debug/autobuilder/main/build.json"
+
+-- === GUI ===
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.CoreGui
+ScreenGui.Name = "AutoBuilder_Hub"
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Parent = ScreenGui
+MainFrame.Size = UDim2.new(0, 250, 0, 120)
+MainFrame.Position = UDim2.new(0.4, 0, 0.4, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Active = true
+MainFrame.Draggable = true
+local UICorner = Instance.new("UICorner")
+UICorner.Parent = MainFrame
+
+local BuildBtn = Instance.new("TextButton")
+BuildBtn.Size = UDim2.new(0, 200, 0, 50)
+BuildBtn.Position = UDim2.new(0.1, 0, 0.3, 0)
+BuildBtn.Text = "ЗАГРУЗИТЬ И ПОСТРОИТЬ"
+BuildBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+BuildBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+BuildBtn.Font = Enum.Font.GothamBold
+BuildBtn.Parent = MainFrame
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.Parent = BuildBtn
+
+-- === ФУНКЦИИ ===
+
+-- Функция очистки платформы (если блоков не хватило)
+local function clearPlatform()
+    -- Здесь должен быть поиск блоков, которые поставил скрипт. 
+    -- Обычно это поиск всех блоков игрока в определенной зоне.
+    print("Очистка платформы...")
+    for _, obj in pairs(Workspace:GetChildren()) do
+        if obj:IsA("BasePart") and obj:FindFirstChild("BuiltByScript") then
+            obj:Destroy()
+        end
+    end
+end
+
+-- Функция проверки наличия предмета в инвентаре
+local function hasItem(itemName)
+    local backpack = Player.Backpack
+    local character = Player.Character
+    if backpack:FindFirstChild(itemName) or (character and character:FindFirstChild(itemName)) then
+        return true
+    end
+    return false
+end
+
+-- Основная логика строительства
+local function startBuild()
+    local success, response = pcall(function()
+        return game:HttpGet(GitHubUrl)
+    end)
+
+    if not success then 
+        warn("Ошибка загрузки файла с GitHub!") 
+        return 
+    end
+
+    -- Парсинг строк (каждая строка — отдельный блок)
+    local lines = response:split("\n")
+    local buildQueue = {}
+
+    for _, line in pairs(lines) do
+        if line ~= "" then
+            -- Формат: Название-Коорд-Размер=end
+            -- Пример: Block-20 1 1-7 8 9=end
+            local cleanLine = line:gsub("=end", "")
+            local parts = cleanLine:split("-")
+
+            if #parts == 3 then
+                local name = parts[1]
+                local posCoords = parts[2]:split(" ")
+                local sizeCoords = parts[3]:split(" ")
+
+                table.insert(buildQueue, {
+                    Name = name,
+                    Pos = Vector3.new(tonumber(posCoords[1]), tonumber(posCoords[2]), tonumber(posCoords[3])),
+                    Size = Vector3.new(tonumber(sizeCoords[1]), tonumber(sizeCoords[2]), tonumber(sizeCoords[3]))
+                })
+            end
+        end
+    end
+
+    -- Проверка ресурсов перед началом строительства
+    for _, item in pairs(buildQueue) do
+        if not hasItem(item.Name) then
+            clearPlatform()
+            BuildBtn.Text = "НЕХВАТКА ПРЕДМЕТОВ!"
+            task.wait(2)
+            BuildBtn.Text = "ЗАГРУЗИТЬ И ПОСТРОИТЬ"
+            return
+        end
+    end
+
+    -- Процесс расстановки (симуляция реальной постановки)
+    for _, item in pairs(buildQueue) do
+        -- Создаем блок (имитация постановки из инвентаря)
+        local block = Instance.new("Part")
+        block.Name = item.Name
+        block.Size = item.Size
+        block.Position = item.Pos
+        block.Anchored = true
+        block.Parent = Workspace
+        
+        -- Метка, чтобы скрипт знал, что этот блок можно удалить при ошибке ресурсов
+        local tag = Instance.new("BoolValue")
+        tag.Name = "BuiltByScript"
+        tag.Parent = block
+
+        task.wait(0.05) -- Небольшая задержка, чтобы игра не вылетела
+    end
+
+    BuildBtn.Text = "ПОСТРОЙКА ЗАВЕРШЕНА!"
+    task.wait(2)
+    BuildBtn.Text = "ЗАГРУЗИТЬ И ПОСТРОИТЬ"
+end
+
+BuildBtn.MouseButton1Click:Connect(startBuild)
+
+print("AutoBuilder Loaded! Укажите ссылку на RAW GitHub в коде.")
 
