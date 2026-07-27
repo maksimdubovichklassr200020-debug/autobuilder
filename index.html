@@ -2,39 +2,231 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Verification - AutoBuilder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoBuilder — Генератор ключа</title>
     <style>
-        body { background: #1a1a1a; color: white; font-family: sans-serif; text-align: center; padding-top: 100px; }
-        .btn { background: #007bff; color: white; padding: 15px 30px; border: none; cursor: pointer; font-size: 20px; border-radius: 10px; }
-        #ad-box { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                  width: 300px; height: 250px; background: white; color: black; border: 5px solid red; }
-        #close-ad { position: absolute; top: -20px; right: -20px; background: red; color: white; 
-                   cursor: pointer; padding: 5px 10px; display: none; }
-        #status { margin-top: 20px; font-size: 18px; color: #aaa; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0d0d0d;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 24px;
+            padding: 40px 50px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+        .card h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .card .sub {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 30px;
+            letter-spacing: 0.3px;
+        }
+        .key-box {
+            background: #0a0a0a;
+            border: 2px dashed #444;
+            border-radius: 16px;
+            padding: 18px 10px;
+            margin-bottom: 25px;
+            word-break: break-all;
+            font-size: 22px;
+            font-weight: 600;
+            color: #00ff88;
+            letter-spacing: 2px;
+            transition: 0.2s;
+        }
+        .key-box:hover {
+            border-color: #00ff88;
+        }
+        .btn {
+            background: #0072ff;
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+            padding: 14px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 14px rgba(0, 114, 255, 0.3);
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        .btn:hover {
+            background: #005fdd;
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 114, 255, 0.5);
+        }
+        .btn-secondary {
+            background: #2a2a2a;
+            box-shadow: none;
+        }
+        .btn-secondary:hover {
+            background: #3a3a3a;
+            box-shadow: none;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 15px;
+            background: #121212;
+            color: #aaa;
+            border-left: 4px solid #0072ff;
+            text-align: left;
+        }
+        .status b {
+            color: #fff;
+        }
+        .footer {
+            margin-top: 28px;
+            font-size: 12px;
+            color: #555;
+            border-top: 1px solid #222;
+            padding-top: 20px;
+        }
+        .footer a {
+            color: #0072ff;
+            text-decoration: none;
+        }
+        .highlight {
+            color: #00ff88;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
-    <h1>Проверка пользователя</h1>
-    <p>Для доступа к AutoBuilder пройдите верификацию</p>
-    <button class="btn" id="startBtn">Начать прохождение</button>
-    <div id="status">Ожидание...</div>
 
-    <div id="ad-box">
-        <div id="close-ad">X</div>
-        <h2 style="margin-top: 50px;">РЕКЛАМА</h2>
-        <p>Смотрите 10 секунд...</p>
+<div class="card">
+    <h1>🔑 AutoBuilder</h1>
+    <p class="sub">Генерация одноразового ключа для доступа</p>
+
+    <div class="key-box" id="keyDisplay">Нажмите «Сгенерировать»</div>
+
+    <button class="btn" id="genBtn">⚡ Сгенерировать ключ</button>
+    <button class="btn btn-secondary" id="copyBtn">📋 Скопировать ключ</button>
+
+    <div class="status" id="statusArea">
+        <b>Инструкция:</b><br>
+        1. Нажми «Сгенерировать» → получишь уникальный ключ.<br>
+        2. Скопируй его и вставь в окно скрипта Roblox.<br>
+        3. После активации скрипт проверит ключ через <span class="highlight">key.txt</span> на GitHub.
     </div>
 
-    <script>
-        const startBtn = document.getElementById('startBtn');
-        const adBox = document.getElementById('ad-box');
-        const closeAd = document.getElementById('close-ad');
-        const status = document.getElementById('status');
+    <div class="footer">
+        💡 Если ключ не подходит — убедись, что в <b>key.txt</b> на GitHub лежит ТОЧНО ТАКОЙ ЖЕ ключ.<br>
+        <a href="#" id="githubLink">Открыть key.txt на GitHub</a>
+    </div>
+</div>
 
-        startBtn.onclick = () => {
-            startBtn.style.display = 'none';
-            adBox.style.display = 'block';
-            status.innerText = "Смотрите рекламу...";
+<script>
+    (function() {
+        const keyDisplay = document.getElementById('keyDisplay');
+        const genBtn = document.getElementById('genBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const statusArea = document.getElementById('statusArea');
+        const githubLink = document.getElementById('githubLink');
+
+        let currentKey = '';
+
+        // Генерация случайного ключа (32 символа — цифры + буквы)
+        function generateKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 32; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // Обновить статус с подсказкой
+        function setStatus(message, isSuccess = false) {
+            statusArea.innerHTML = message;
+            statusArea.style.borderLeftColor = isSuccess ? '#00ff88' : '#ff5555';
+        }
+
+        // Генерация и отображение ключа
+        function generateAndShow() {
+            const newKey = generateKey();
+            currentKey = newKey;
+            keyDisplay.textContent = newKey;
+            setStatus(
+                '✅ <b>Ключ сгенерирован!</b><br>' +
+                'Скопируй его и вставь в окно скрипта Roblox. ' +
+                'Не забудь обновить <b>key.txt</b> на GitHub этим же ключом, иначе проверка не пройдёт.',
+                true
+            );
+            // Сохраняем в localStorage на всякий случай
+            localStorage.setItem('autobuilder_key', newKey);
+        }
+
+        // Копирование
+        function copyKey() {
+            if (!currentKey) {
+                setStatus('⚠️ Сначала сгенерируй ключ!');
+                return;
+            }
+            navigator.clipboard.writeText(currentKey).then(() => {
+                setStatus('📋 Ключ скопирован в буфер обмена!', true);
+            }).catch(() => {
+                // fallback для старых браузеров
+                const textarea = document.createElement('textarea');
+                textarea.value = currentKey;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                setStatus('📋 Ключ скопирован (старый метод)', true);
+            });
+        }
+
+        // Ссылка на твой key.txt (замени, если репо другое)
+        githubLink.href = 'https://raw.githubusercontent.com/maksimdubovichklassr200020-debug/autobuilder/main/key.txt';
+        githubLink.target = '_blank';
+
+        // События
+        genBtn.addEventListener('click', generateAndShow);
+        copyBtn.addEventListener('click', copyKey);
+
+        // Если уже есть ключ в localStorage — показать его
+        const saved = localStorage.getItem('autobuilder_key');
+        if (saved && saved.length > 10) {
+            currentKey = saved;
+            keyDisplay.textContent = saved;
+            setStatus('🔄 Восстановлен предыдущий ключ. Можешь скопировать его.', true);
+        }
+
+        // Ну и на будущее: если пользователь кликнет по ключу — скопировать
+        keyDisplay.addEventListener('click', copyKey);
+        keyDisplay.style.cursor = 'pointer';
+        keyDisplay.title = 'Кликни, чтобы скопировать';
+    })();
+</script>
+
+</body>
+</html>            status.innerText = "Смотрите рекламу...";
             
             setTimeout(() => {
                 closeAd.style.display = 'block';
