@@ -1,39 +1,140 @@
 --[[ 
-    AUTO-BUILDER SYSTEM (GitHub/JSON)
-    Формат файла: Название-X Y Z-S X S Y S Z=end
-    Пример: Block-20 1 1-7 8 9=end
+    AUTO-BUILDER HUB (Key System & Dynamic Menu)
+    Delta Executor Optimized
 ]]
 
 local Player = game.Players.LocalPlayer
 local HttpService = game:GetService("HttpService")
 local Workspace = game:GetService("Workspace")
 
--- === НАСТРОЙКИ ===
--- Вставь сюда прямую ссылку на RAW файл с GitHub (ссылка должна начинаться с raw.githubusercontent.com)
-local GitHubUrl = "https://raw.githubusercontent.com/maksimdubovichklassr200020-debug/autobuilder/main/build.json"
+-- === НАСТРОЙКИ ГИТХАБА ===
+local GitHubBaseUrl = "https://raw.githubusercontent.com/ТВОЙ_НИК/ТВОЙ_РЕПО/main" 
+local VerifyUrl = "https://ТВОЙ_НИК.github.io/ТВОЙ_РЕПО/" -- Ссылка на index.html
+
+local IsVerified = false
 
 -- === GUI ===
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = game.CoreGui
-ScreenGui.Name = "AutoBuilder_Hub"
+ScreenGui.Name = "AutoBuilder_Pro"
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 250, 0, 120)
-MainFrame.Position = UDim2.new(0.4, 0, 0.4, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-MainFrame.Active = true
-MainFrame.Draggable = true
-local UICorner = Instance.new("UICorner")
-UICorner.Parent = MainFrame
+-- Окно верификации
+local VerifyFrame = Instance.new("Frame")
+VerifyFrame.Size = UDim2.new(0, 300, 0, 150)
+VerifyFrame.Position = UDim2.new(0.35, 0, 0.4, 0)
+VerifyFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+VerifyFrame.Parent = ScreenGui
+VerifyFrame.Visible = true
 
-local BuildBtn = Instance.new("TextButton")
-BuildBtn.Size = UDim2.new(0, 200, 0, 50)
-BuildBtn.Position = UDim2.new(0.1, 0, 0.3, 0)
-BuildBtn.Text = "ЗАГРУЗИТЬ И ПОСТРОИТЬ"
-BuildBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
-BuildBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-BuildBtn.Font = Enum.Font.GothamBold
+local VerifyText = Instance.new("TextLabel")
+VerifyText.Size = UDim2.new(1, 0, 0, 50)
+VerifyText.Text = "Требуется проверка!"
+VerifyText.TextColor3 = Color3.fromRGB(255, 255, 255)
+VerifyText.Parent = VerifyFrame
+
+local VerifyBtn = Instance.new("TextButton")
+VerifyBtn.Size = UDim2.new(0, 200, 0, 40)
+VerifyBtn.Position = UDim2.new(0.15, 0, 0.5, 0)
+VerifyBtn.Text = "Пройти проверку"
+VerifyBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+VerifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+VerifyBtn.Parent = VerifyFrame
+
+-- Главное меню билдера (скрыто по умолчанию)
+local MainMenu = Instance.new("Frame")
+MainMenu.Size = UDim2.new(0, 400, 0, 300)
+MainMenu.Position = UDim2.new(0.3, 0, 0.3, 0)
+MainMenu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainMenu.Visible = false
+MainMenu.Parent = ScreenGui
+
+local MenuTitle = Instance.new("TextLabel")
+MenuTitle.Size = UDim2.new(1, 0, 0, 40)
+MenuTitle.Text = "Список доступных построек"
+MenuTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+MenuTitle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MenuTitle.Parent = MainMenu
+
+local BuildList = Instance.new("ScrollingFrame")
+BuildList.Size = UDim2.new(0, 380, 0, 240)
+BuildList.Position = UDim2.new(0, 10, 0, 50)
+BuildList.CanvasSize = UDim2.new(0, 0, 5, 0) -- Бесконечный список
+BuildList.BackgroundTransparency = 1
+BuildList.Parent = MainMenu
+
+local Layout = Instance.new("UIListLayout")
+Layout.Parent = BuildList
+Layout.Padding = UDim.new(0, 5)
+
+-- === ЛОГИКА ===
+
+-- Функция строительства (из предыдущего ответа)
+local function executeBuild(jsonUrl)
+    local success, response = pcall(function() return game:HttpGet(jsonUrl) end)
+    if not success then return end
+    
+    local lines = response:split("\n")
+    for _, line in pairs(lines) do
+        if line ~= "" then
+            local cleanLine = line:gsub("=end", "")
+            local parts = cleanLine:split("-")
+            if #parts == 3 then
+                local name, pos, size = parts[1], parts[2], parts[3]
+                local pCoords = pos:split(" ")
+                local sCoords = size:split(" ")
+                
+                local block = Instance.new("Part")
+                block.Name = name
+                block.Position = Vector3.new(tonumber(pCoords[1]), tonumber(pCoords[2]), tonumber(pCoords[3]))
+                block.Size = Vector3.new(tonumber(sCoords[1]), tonumber(sCoords[2]), tonumber(sCoords[3]))
+                block.Anchored = true
+                block.Parent = Workspace
+                task.wait(0.01)
+            end
+        end
+    end
+end
+
+-- Проверка верификации (симуляция)
+VerifyBtn.MouseButton1Click:Connect(function()
+    setclipboard(VerifyUrl) -- Копируем ссылку в буфер обмена
+    VerifyText.Text = "Ссылка скопирована! Пройдите её."
+    task.wait(3)
+    -- В реальности здесь должен быть запрос к API, но для примера:
+    IsVerified = true 
+    VerifyFrame.Visible = false
+    MainMenu.Visible = true
+end)
+
+-- Загрузка списка построек из GitHub (папка /main/build/)
+-- Так как GitHub API сложен, мы предполагаем, что у тебя есть файл list.json со списком имен файлов в этой папке
+local function loadBuilds()
+    local listUrl = GitHubBaseUrl .. "/build/list.json" 
+    local success, response = pcall(function() return game:HttpGet(listUrl) end)
+    
+    if success then
+        local builds = HttpService:JSONDecode(response) -- Ожидается формат {"Mini-Titan": "Описание...", "Ship": "..."}
+        for name, desc in pairs(builds) do
+            local btn = Instance.new("TextButton")
+            btn.Size = UDim2.new(1, 0, 0, 40)
+            btn.Text = name .. " - " .. desc
+            btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            btn.Parent = BuildList
+            btn.MouseButton1Click:Connect(function()
+                executeBuild(GitHubBaseUrl .. "/build/" .. name .. ".json")
+            end)
+        end
+    end
+end
+
+if IsVerified then loadBuilds() end -- Если зашел сразу (в будущем)
+VerifyBtn.MouseButton1Click:Connect(function() 
+    task.wait(1) 
+    loadBuilds() 
+end)
+
+print("AutoBuilder Hub Loaded!")
 BuildBtn.Parent = MainFrame
 local BtnCorner = Instance.new("UICorner")
 BtnCorner.Parent = BuildBtn
