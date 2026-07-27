@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Verification - AutoBuilder</title>
+    <style>
+        body { background: #1a1a1a; color: white; font-family: sans-serif; text-align: center; padding-top: 100px; }
+        .btn { background: #007bff; color: white; padding: 15px 30px; border: none; cursor: pointer; font-size: 20px; border-radius: 10px; }
+        #ad-box { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                  width: 300px; height: 250px; background: white; color: black; border: 5px solid red; }
+        #close-ad { position: absolute; top: -20px; right: -20px; background: red; color: white; 
+                   cursor: pointer; padding: 5px 10px; display: none; }
+        #status { margin-top: 20px; font-size: 18px; color: #aaa; }
+    </style>
+</head>
+<body>
+    <h1>Проверка пользователя</h1>
+    <p>Для доступа к AutoBuilder пройдите верификацию</p>
+    <button class="btn" id="startBtn">Начать прохождение</button>
+    <div id="status">Ожидание...</div>
+
+    <div id="ad-box">
+        <div id="close-ad">X</div>
+        <h2 style="margin-top: 50px;">РЕКЛАМА</h2>
+        <p>Смотрите 10 секунд...</p>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const adBox = document.getElementById('ad-box');
+        const closeAd = document.getElementById('close-ad');
+        const status = document.getElementById('status');
+
+        startBtn.onclick = () => {
+            startBtn.style.display = 'none';
+            adBox.style.display = 'block';
+            status.innerText = "Смотрите рекламу...";
+            
+            setTimeout(() => {
+                closeAd.style.display = 'block';
+                status.innerText = "Теперь нажмите X в углу рекламы!";
+            }, 10000);
+        };
+
+        closeAd.onclick = () => {
+            adBox.style.display = 'none';
+            status.innerHTML = "<b style='color: lime;'>ПОДТВЕРЖДЕНО!</b><br>Теперь вернитесь в Roblox и активируйте скрипт.";
+            // В реальной системе здесь был бы запрос к базе данных.
+            localStorage.setItem('verified', 'true'); 
+        };
+    </script>
+</body>
+</html>
